@@ -76,18 +76,6 @@
                 </div>
             </div>
 
-            <div class="form-group">
-                <label for="usuario" class="form-label">Nome de Usuário</label>
-                <input 
-                    type="text" 
-                    id="usuario" 
-                    name="usuario" 
-                    class="form-input" 
-                    placeholder="Digite um nome de usuário"
-                    required
-                >
-            </div>
-
             <div class="form-row">
                 <div class="form-group">
                     <label for="senha" class="form-label">Senha</label>
@@ -116,9 +104,87 @@
                 </div>
             </div>
 
+            <div id="campos-cliente" class="campos-condicionais" style="display: none;">
+                <div class="divider">
+                    <span>Dados do Veículo</span>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="placa" class="form-label">Placa</label>
+                        <input 
+                            type="text" 
+                            id="placa" 
+                            name="placa" 
+                            class="form-input" 
+                            placeholder="ABC-1234"
+                            maxlength="8"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="modelo" class="form-label">Modelo</label>
+                        <input 
+                            type="text" 
+                            id="modelo" 
+                            name="modelo" 
+                            class="form-input" 
+                            placeholder="Ex: Civic, Gol, Corolla"
+                        >
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="marca" class="form-label">Fabricante</label>
+                        <input 
+                            type="text" 
+                            id="marca" 
+                            name="marca" 
+                            class="form-input" 
+                            placeholder="Ex: Honda, Volkswagen, Toyota"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ano" class="form-label">Ano</label>
+                        <input 
+                            type="text" 
+                            id="ano" 
+                            name="ano" 
+                            class="form-input" 
+                            placeholder="2024"
+                            maxlength="4"
+                        >
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="cor" class="form-label">Cor</label>
+                    <input 
+                        type="text" 
+                        id="cor" 
+                        name="cor" 
+                        class="form-input" 
+                        placeholder="Ex: Prata, Preto, Branco"
+                    >
+                </div>
+            </div>
+
             <div id="campos-funcionario" class="campos-condicionais" style="display: none;">
                 <div class="divider">
                     <span>Informações do Funcionário</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="modelo" class="form-label">Nome</label>
+                    <input 
+                        type="text" 
+                        id="nome-funcionario" 
+                        name="nome-funcionario" 
+                        class="form-input" 
+                        placeholder="Pedro"
+                    >
                 </div>
 
                 <div class="form-row">
@@ -132,15 +198,6 @@
                         </select>
                     </div>
 
-                    <div class="form-group">
-                        <label for="data_admissao" class="form-label">Data de Admissão</label>
-                        <input 
-                            type="date" 
-                            id="data_admissao" 
-                            name="data_admissao" 
-                            class="form-input"
-                        >
-                    </div>
                 </div>
             </div>
 
@@ -162,20 +219,24 @@
 
 <script>
 document.getElementById('tipo_usuario').addEventListener('change', function() {
+    const camposCliente = document.getElementById('campos-cliente');
     const camposFuncionario = document.getElementById('campos-funcionario');
     const cargo = document.getElementById('cargo');
-    const dataAdmissao = document.getElementById('data_admissao');
+    const nivelAcesso = document.getElementById('nivel_acesso');
     
-    if (this.value === 'funcionario') {
-        camposFuncionario.style.display = 'block';
-        cargo.required = true;
-        dataAdmissao.required = true;
-    } else {
+    if (this.value === 'cliente') {
+        camposCliente.style.display = 'block';
         camposFuncionario.style.display = 'none';
         cargo.required = false;
-        dataAdmissao.required = false;
-        cargo.value = '';
-        dataAdmissao.value = '';
+        nivelAcesso.required = false;
+    } else if (this.value === 'funcionario') {
+        camposCliente.style.display = 'none';
+        camposFuncionario.style.display = 'block';
+        cargo.required = true;
+        nivelAcesso.required = true;
+    } else {
+        camposCliente.style.display = 'none';
+        camposFuncionario.style.display = 'none';
     }
 });
 
@@ -194,6 +255,16 @@ document.getElementById('celular').addEventListener('input', function(e) {
     if (value.length <= 11) {
         value = value.replace(/(\d{2})(\d)/, '($1) $2');
         value = value.replace(/(\d{5})(\d)/, '$1-$2');
+        e.target.value = value;
+    }
+});
+
+document.getElementById('placa').addEventListener('input', function(e) {
+    let value = e.target.value.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+    if (value.length <= 7) {
+        if (value.length > 3) {
+            value = value.slice(0, 3) + '-' + value.slice(3);
+        }
         e.target.value = value;
     }
 });
