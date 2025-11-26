@@ -1,12 +1,11 @@
 from flask import Flask, g
 import sqlite3
-import click
 
 from utils import Logger
 
 log = Logger("App", enabled=True)
 
-app = Flask(__name__, template_folder="pages")
+app = Flask(__name__, template_folder="pages", static_folder="static")
 
 DATABASE = 'automax.db'
 
@@ -25,13 +24,14 @@ def close_connection(exception):
     db = getattr(g, '_database', None)
     if db is not None:
         db.close()
-        
 
-# NÃO MOVA AS DUAS LINHAS ABAIXO OU TUDO QUEBRA!
+
+# Importa as rotas DEPOIS de criar o app
 from routes import home 
-from routes import produtos
+from routes import produto  # ← SINGULAR!
 
 
+# Este bloco só executa se rodar com "python app.py"
 if __name__ == "__main__":
-    app.run(debug=True)
-
+    log.info("Iniciando servidor Flask...")
+    app.run(debug=True, host='0.0.0.0', port=5000)

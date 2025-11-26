@@ -1,8 +1,12 @@
 from flask import render_template
 from app import app
 
-@app.route('/home')
+@app.route('/')
 def home():
+    return render_template('index.html')
+
+@app.route('/home')
+def home_alt():
     return render_template('index.html')
 
 @app.route('/index')
@@ -17,5 +21,5 @@ def login():
 def cadastro():
     return render_template('cadastro.html')
 
-# ← só essa linha abaixo
+# Importa as rotas de produtos
 import routes.produto
