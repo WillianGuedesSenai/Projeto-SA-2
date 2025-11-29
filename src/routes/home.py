@@ -1,4 +1,4 @@
-from flask import render_template, request
+from flask import render_template, request, make_response
 from app import app, get_db
 import bcrypt
 
@@ -7,6 +7,9 @@ import sqlite3
 
 @app.route('/home')
 def home():
+    usuario = request.cookies.get("usuario")
+    if not usuario:
+        return "Você não está logado"
     return render_template('index.html')
 
 @app.route('/index')
@@ -25,11 +28,16 @@ def login():
         cursor.execute("SELECT senha FROM funcionarios WHERE nome_funcionario=?", (log_nome,))
         row = cursor.fetchone()
 
+
         if row:
             hash_senha = row[0]  
             if bcrypt.checkpw(log_senha.encode('utf-8'), hash_senha):
+                resp = make_response("Login feito com sucesso")
+                resp.set_cookie("usuario", log_nome, max_age=60*60*24) 
                 conn.close()
-                return "Login feito com sucesso"
+                return resp
+            
+                
             
 
         cursor.execute("SELECT senha FROM clientes WHERE nome_cliente=?", (log_nome,))
@@ -63,6 +71,8 @@ def cadastro():
 
         salt = bcrypt.gensalt()  # Gera um salt aleatório
         senha_hash = bcrypt.hashpw(senha.encode('utf-8'), salt)
+
+
 
         conn = get_db()
         cursor = conn.cursor()
