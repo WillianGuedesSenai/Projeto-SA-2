@@ -165,9 +165,9 @@ def Inserir_dados():
 
     # Inserindo funcionários com diferentes níveis de acesso
     funcionarios = [
-        ('$2a$12$GDvXuhxPgDCeVHxNSDuEiOLB/sS4DLhnN7b80PlUSCeJtGNz/NXb6', 'Carlos Mendes', '3'),      # Gerente - Nível 3
-        ('$2a$12$BeKxQu2T1M7SdWDNCtvdN.7ButNJTX1gUsGhRBz7fiJl1lqfHcClS', 'Roberto Santos', '2'),    # Mecânico - Nível 2
-        ('$2a$12$CpGfc6d35zl.f/VcykquV.eKQKS5wrqSUuXbGWYarVjzQ1YcIkVMe', 'Ana Costa', '1')             # Recepcionista - Nível 1
+        ('$2a$12$GDvXuhxPgDCeVHxNSDuEiOLB/sS4DLhnN7b80PlUSCeJtGNz/NXb6'.encode("UTF-8"), 'Carlos Mendes', '3'),      # Gerente - Nível 3
+        ('$2a$12$BeKxQu2T1M7SdWDNCtvdN.7ButNJTX1gUsGhRBz7fiJl1lqfHcClS'.encode("UTF-8"), 'Roberto Santos', '2'),    # Mecânico - Nível 2
+        ('$2a$12$CpGfc6d35zl.f/VcykquV.eKQKS5wrqSUuXbGWYarVjzQ1YcIkVMe'.encode("UTF-8"), 'Ana Costa', '1')             # Recepcionista - Nível 1
     ]
     
     cursor.executemany('''
