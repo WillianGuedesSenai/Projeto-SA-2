@@ -73,7 +73,7 @@ def init_database():
         FOREIGN KEY (id_log) REFERENCES logs(id_log) ON DELETE SET NULL
     );
     
-    CREATE TABLE IF NOT EXISTS logs (s
+    CREATE TABLE IF NOT EXISTS logs (
         id_log INTEGER PRIMARY KEY AUTOINCREMENT,
         id_funcionario INTEGER,
         detalhe TEXT,
