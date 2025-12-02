@@ -9,7 +9,7 @@ cursor = conn.cursor()
 def init_database():
     
     
-    cursor.execute("PRAGMA foreign_keys = ON;") #Boa prática: usar FOREIGN KEY enforcement Por padrão, o SQLite não ativa chaves estrangeiras.
+    cursor.execute("PRAGMA foreign_keys = ON;")
 
     cursor.executescript('''
     CREATE TABLE IF NOT EXISTS veiculos (
@@ -24,7 +24,7 @@ def init_database():
     CREATE TABLE IF NOT EXISTS produtos (
         id_produto INTEGER PRIMARY KEY AUTOINCREMENT,
         nome TEXT NOT NULL,  
-        preco INTEGER NOT NULL,
+        preco REAL NOT NULL,
         stock INTEGER,
         imagem TEXT NOT NULL,
         categoria TEXT NOT NULL
@@ -44,7 +44,7 @@ def init_database():
         id_funcionario INTEGER PRIMARY KEY AUTOINCREMENT,
         senha BLOB NOT NULL,
         nome_funcionario TEXT NOT NULL,
-        nivel_de_acesso TEXT NOT NULL -- "gerente", "mecanico" ou "recepcionista"
+        nivel_de_acesso TEXT NOT NULL
      );
     
     CREATE TABLE IF NOT EXISTS ordem (
@@ -60,17 +60,25 @@ def init_database():
         conclusao_ordem TEXT,
         mao_de_obra REAL,
         orcamento REAL,
-        FOREIGN KEY (id_funcionario) REFERENCES funcionarios(id_funcionario),
-        FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente),
-        FOREIGN KEY (id_veiculo) REFERENCES veiculos(id_veiculo)
+        FOREIGN KEY (id_funcionario) REFERENCES funcionarios(id_funcionario) ON DELETE CASCADE,
+        FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente) ON DELETE CASCADE,
+        FOREIGN KEY (id_veiculo) REFERENCES veiculos(id_veiculo) ON DELETE CASCADE
+    );
+    
+    CREATE TABLE IF NOT EXISTS logs (
+        log INTEGER PRIMARY KEY AUTOINCREMENT,
+        id_funcionario INTEGER,
+        detalhe TEXT,
+        momento_acao TEXT,
+        FOREIGN KEY (id_funcionario) REFERENCES funcionarios(id_funcionario) ON DELETE SET NULL
     );
     
     CREATE TABLE IF NOT EXISTS funcionario_ordems (
         id_funcionario_ordem INTEGER PRIMARY KEY AUTOINCREMENT,
         id_ordem INTEGER NOT NULL,
         id_funcionario INTEGER NOT NULL,
-        FOREIGN KEY (id_ordem) REFERENCES ordem(id_ordem),
-        FOREIGN KEY (id_funcionario) REFERENCES funcionarios(id_funcionario)
+        FOREIGN KEY (id_ordem) REFERENCES ordem(id_ordem) ON DELETE CASCADE,
+        FOREIGN KEY (id_funcionario) REFERENCES funcionarios(id_funcionario) ON DELETE CASCADE
     );
     
     CREATE TABLE IF NOT EXISTS historico_ordems (
@@ -79,9 +87,9 @@ def init_database():
         id_cliente INTEGER NOT NULL,
         id_veiculo INTEGER NOT NULL,
         abertura TEXT,
-        FOREIGN KEY (id_ordem) REFERENCES ordem(id_ordem),
-        FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente),
-        FOREIGN KEY (id_veiculo) REFERENCES veiculos(id_veiculo)
+        FOREIGN KEY (id_ordem) REFERENCES ordem(id_ordem) ON DELETE CASCADE,
+        FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente) ON DELETE CASCADE,
+        FOREIGN KEY (id_veiculo) REFERENCES veiculos(id_veiculo) ON DELETE CASCADE
     );
     
     CREATE TABLE IF NOT EXISTS fornecedores (
@@ -96,7 +104,7 @@ def init_database():
         quantidade INTEGER NOT NULL,
         tipo TEXT,
         id_fornecedor INTEGER NOT NULL,
-        FOREIGN KEY (id_fornecedor) REFERENCES fornecedores(id_fornecedor)
+        FOREIGN KEY (id_fornecedor) REFERENCES fornecedores(id_fornecedor) ON DELETE CASCADE
     );
     
     CREATE TABLE IF NOT EXISTS ordem_pecas (
@@ -104,15 +112,14 @@ def init_database():
         id_peca INTEGER NOT NULL,
         id_ordem INTEGER NOT NULL,
         quantidade_trocas INTEGER,
-        FOREIGN KEY (id_peca) REFERENCES pecas(id_peca),
-        FOREIGN KEY (id_ordem) REFERENCES ordem(id_ordem)
+        FOREIGN KEY (id_peca) REFERENCES pecas(id_peca) ON DELETE CASCADE,
+        FOREIGN KEY (id_ordem) REFERENCES ordem(id_ordem) ON DELETE CASCADE
     );
     ''')
     
     conn.commit()
 
 def Inserir_dados():
-    # Inserindo dados de veiculos
     veiculos = [
         ('Toyota', 'Preto', '2020', 'Corolla', 'ABC-1234'),
         ('Honda', 'Branco', '2021', 'Civic', 'XYZ-5678'),
@@ -123,7 +130,6 @@ def Inserir_dados():
         VALUES (?, ?, ?, ?, ?)
     ''', veiculos)
 
-    # Inserindo dados de produtos
     produtos = [
         ('Óleo de motor', 50, 100, 'óleo_motor.jpg', 'Pecas'),
         ('Filtro de ar', 30, 200, 'filtro_ar.jpg', 'Pecas'),
@@ -151,23 +157,20 @@ def Inserir_dados():
         VALUES (?, ?, ?, ?, ?)
     ''', produtos)
 
-    # Inserindo dados de clientes (sem duplicatas de CPF)
     clientes = [
-        ('João Silva', '123.456.789-00', '123456789', 'joao@email.com', 'senha123'),
-        ('Maria Oliveira', '987.654.321-00', '987654321', 'maria@email.com', 'senha456'),
+        ('João Silva', '123.456.789-00', '123456789', 'joao@email.com', '$2a$12$pYP4kAD2vLNv4zjeksgvae0KdACRpI7CN08/fq.wB6DtoMCEKwbf6'.encode("utf-8")),
+        ('Maria Oliveira', '987.654.321-00', '987654321', 'maria@email.com', '$2a$12$pYP4kAD2vLNv4zjeksgvae0KdACRpI7CN08/fq.wB6DtoMCEKwbf6'.encode("utf-8")),
     ]
 
-    # Inserindo clientes sem duplicatas
     cursor.executemany('''
         INSERT INTO clientes (nome_cliente, CPF, celular, email, senha)
         VALUES (?, ?, ?, ?, ?)
     ''', clientes)
 
-    # Inserindo funcionários com diferentes níveis de acesso
     funcionarios = [
-        ('$2a$12$GDvXuhxPgDCeVHxNSDuEiOLB/sS4DLhnN7b80PlUSCeJtGNz/NXb6'.encode("UTF-8"), 'Carlos Mendes', '3'),      # Gerente - Nível 3
-        ('$2a$12$BeKxQu2T1M7SdWDNCtvdN.7ButNJTX1gUsGhRBz7fiJl1lqfHcClS'.encode("UTF-8"), 'Roberto Santos', '2'),    # Mecânico - Nível 2
-        ('$2a$12$CpGfc6d35zl.f/VcykquV.eKQKS5wrqSUuXbGWYarVjzQ1YcIkVMe'.encode("UTF-8"), 'Ana Costa', '1')             # Recepcionista - Nível 1
+        ('$2a$12$GDvXuhxPgDCeVHxNSDuEiOLB/sS4DLhnN7b80PlUSCeJtGNz/NXb6'.encode("UTF-8"), 'Carlos Mendes', '3'),      
+        ('$2a$12$BeKxQu2T1M7SdWDNCtvdN.7ButNJTX1gUsGhRBz7fiJl1lqfHcClS'.encode("UTF-8"), 'Roberto Santos', '2'),    
+        ('$2a$12$CpGfc6d35zl.f/VcykquV.eKQKS5wrqSUuXbGWYarVjzQ1YcIkVMe'.encode("UTF-8"), 'Ana Costa', '1')             
     ]
     
     cursor.executemany('''
@@ -175,7 +178,6 @@ def Inserir_dados():
         VALUES (?, ?, ?)
     ''', funcionarios)
 
-    # Commit e fechamento da conexão
     conn.commit()
     conn.close()
 
