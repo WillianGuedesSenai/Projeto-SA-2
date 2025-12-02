@@ -1,5 +1,9 @@
 call venv\Scripts\activate
 
-REM start cmd /k "npx tailwindcss -i ./static/styles/input.css -o ./static/styles/output.css --watch"
+pip install flask
+pip install bcrypt
+
+cls
+
 
 flask --app app run --debug
